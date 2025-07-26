@@ -5,8 +5,9 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-	"os"
 	"path/filepath"
+
+	"github.com/go-chi/chi/v5"
 )
 
 func executeTemplate(w http.ResponseWriter, filepath string) {
@@ -27,7 +28,7 @@ func executeTemplate(w http.ResponseWriter, filepath string) {
 }
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
-	tplPath := filepath.Join("templates", "home.gohtml")
+	tplPath := filepath.Join("templates", "index.gohtml")
 	executeTemplate(w, tplPath)	
 }
 
@@ -35,6 +36,11 @@ func contactHandler(w http.ResponseWriter, r *http.Request) {
 	tplPath := filepath.Join("templates", "contact.gohtml")
 	executeTemplate(w, tplPath)
 }
+
+func faqHandler(w http.ResponseWriter, r *http.Request) {
+	executeTemplate(w, filepath.Join("templates", "faq.gohtml"))
+}
+
 
 type User struct {
 	Name string
@@ -47,13 +53,13 @@ type UserMeta struct {
 }
 
 func main() {
-	fmt.Println("Starting with templates")
-	t, err := template.ParseFiles("templates/hello.gohtml")
-	if err != nil {
-		panic(err)
-	}
-	err = t.Execute(os.Stdout, nil)
-	if err != nil {
-		panic(err)
-	}
+	r := chi.NewRouter()
+	r.Get("/", homeHandler)
+	r.Get("/contact", contactHandler)
+	r.Get("/faq", faqHandler)
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "Page Not Found", http.StatusNotFound)
+	})
+	fmt.Println("Starting the server on: 3500...")
+	http.ListenAndServe(":3500", r)
 }
