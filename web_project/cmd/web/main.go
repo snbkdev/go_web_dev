@@ -6,11 +6,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {
+func executeTemplate(w http.ResponseWriter, filepath string) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	tpl, err := template.ParseFiles("templates/hello.gohtml")
+	
+	tpl, err := template.ParseFiles(filepath)
 	if err != nil {
 		log.Printf("parsing template: %v", err)
 		http.Error(w, "There was an error parsing the template", http.StatusInternalServerError)
@@ -22,6 +24,16 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "There was an error executing the template", http.StatusInternalServerError)
 		return
 	}
+}
+
+func homeHandler(w http.ResponseWriter, r *http.Request) {
+	tplPath := filepath.Join("templates", "home.gohtml")
+	executeTemplate(w, tplPath)	
+}
+
+func contactHandler(w http.ResponseWriter, r *http.Request) {
+	tplPath := filepath.Join("templates", "contact.gohtml")
+	executeTemplate(w, tplPath)
 }
 
 type User struct {
@@ -40,10 +52,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	user := User{Name: "John Doe", Age: 27, Meta: UserMeta{Visits: 8,}}
-
-	err = t.Execute(os.Stdout, user)
+	err = t.Execute(os.Stdout, nil)
 	if err != nil {
 		panic(err)
 	}
