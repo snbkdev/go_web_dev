@@ -6,9 +6,9 @@ services:
     image: postgres 
     restart: always 
     environment: 
-      POSTGRES_USER: baloo
-      POSTGRES_PASSWORD: junglebook
-      POSTGRES_DB: lenslocked
+      POSTGRES_USER: ***
+      POSTGRES_PASSWORD: ***
+      POSTGRES_DB: ***
     ports:
       - 5432:5432
 
