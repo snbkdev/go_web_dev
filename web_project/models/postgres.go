@@ -42,4 +42,24 @@ func config() {
 	}
 
 	fmt.Println("Connected!")
+
+	// Create a table
+	_, err = db.Exec(`
+		create table if not exists users (
+			id SERIAL PRIMARY KEY,
+			name TEXT,
+			email TEXT UNIQUE NOT NULL
+		);
+
+		create table if not exists orders (
+			id SERIAL PRIMARY KEY,
+			user_id INT NOT NULL,
+			amount INT,
+			description TEXT
+		);
+	`)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Tables created")
 }
