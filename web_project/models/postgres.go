@@ -64,10 +64,11 @@ func config() {
 	fmt.Println("Tables created")
 
 	// insert some data
+	name := "Jack"
+	email := "test2@mail.ru"
 	_, err = db.Exec(`
 		insert into users(name, email)
-		values('John', 'test@mail.ru')
-	`)
+		values($1, $2);`, name, email)
 	if err != nil {
 		panic(err)
 	}
