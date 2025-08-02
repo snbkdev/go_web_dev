@@ -62,4 +62,14 @@ func config() {
 		panic(err)
 	}
 	fmt.Println("Tables created")
+
+	// insert some data
+	_, err = db.Exec(`
+		insert into users(name, email)
+		values('John', 'test@mail.ru')
+	`)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("User created")
 }
