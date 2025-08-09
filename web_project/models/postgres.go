@@ -76,15 +76,26 @@ func config() {
 	// }
 	// fmt.Println("User created. id =", id)
 
-	id := 7
-	row := db.QueryRow(`select name, email from users where id = $1;`, id)
-	var name, email string
-	err = row.Scan(&name, &email)
-	if err == sql.ErrNoRows {
-		fmt.Println("Error No Rows!")
+	// id := 7
+	// row := db.QueryRow(`select name, email from users where id = $1;`, id)
+	// var name, email string
+	// err = row.Scan(&name, &email)
+	// if err == sql.ErrNoRows {
+	// 	fmt.Println("Error No Rows!")
+	// }
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Printf("User information: name=%s, email=%s\n", name, email)
+
+	userID := 1
+	for i := 0; i <= 5; i++ {
+		amount := i * 100
+		desc := fmt.Sprintf("fake order #%d", i)
+		_, err := db.Exec(`insert into orders(user_id, amount, description) values($1, $2, $3)`, userID, amount, desc)
+		if err != nil {
+			panic(err)
+		}
 	}
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("User information: name=%s, email=%s\n", name, email)
+	fmt.Println("Created fake orders")
 }
