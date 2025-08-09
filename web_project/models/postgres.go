@@ -66,11 +66,13 @@ func config() {
 	// insert some data
 	name := "Jack"
 	email := "test2@mail.ru"
-	_, err = db.Exec(`
+	row := db.QueryRow(`
 		insert into users(name, email)
-		values($1, $2);`, name, email)
+		values($1, $2) returning id;`, name, email)
+	var id int
+	err = row.Scan(&id)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("User created")
+	fmt.Println("User created. id =", id)
 }
