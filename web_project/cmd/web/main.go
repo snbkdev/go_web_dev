@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"web_project/controllers"
+	"web_project/models"
 	"web_project/templates"
 	"web_project/views"
 
@@ -11,6 +12,19 @@ import (
 )
 
 func main() {
+	cfg := models.DefaultPostgresConfig()
+	db, err := models.Open(cfg)
+	if err != nil {
+		panic(err)
+	}
+	defer db.Close()
+
+	err = db.Ping()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println("Connected!")
+
 	r := chi.NewRouter()
 
 	r.Get("/", controllers.StaticHandler(views.Must(views.ParseFS(templates.FS, "index.gohtml", "tailwind.gohtml"))))
