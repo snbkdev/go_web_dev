@@ -2,13 +2,16 @@ package controllers
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 	"web_project/models"
+
+	"github.com/gorilla/csrf"
 )
 
-type Users struct{
-	Templates struct{
-		New Template
+type Users struct {
+	Templates struct {
+		New    Template
 		SignIn Template
 	}
 	UserService *models.UserService
@@ -16,14 +19,16 @@ type Users struct{
 
 func (u Users) New(w http.ResponseWriter, r *http.Request) {
 	var data struct {
-		Email string
+		Email     string
+		CSRFField template.HTML
 	}
 	data.Email = r.FormValue("email")
+	data.CSRFField = csrf.TemplateField(r)
 	u.Templates.New.Execute(w, data)
 }
 
 func (u Users) Create(w http.ResponseWriter, r *http.Request) {
-	email :=  r.FormValue("email")
+	email := r.FormValue("email")
 	password := r.FormValue("password")
 	user, err := u.UserService.Create(email, password)
 	if err != nil {
@@ -44,7 +49,7 @@ func (u Users) SignIn(w http.ResponseWriter, r *http.Request) {
 
 func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	var data struct {
-		Email string
+		Email    string
 		Password string
 	}
 	data.Email = r.FormValue("email")
@@ -56,9 +61,9 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cookie := http.Cookie{
-		Name: "email",
-		Value: user.Email,
-		Path: "/",
+		Name:     "email",
+		Value:    user.Email,
+		Path:     "/",
 		HttpOnly: true,
 	}
 	http.SetCookie(w, &cookie)

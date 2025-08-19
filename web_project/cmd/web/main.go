@@ -36,7 +36,7 @@ func main() {
 		DB: db,
 	}
 
-	usersC := controllers.Users{UserService: &userService, }
+	usersC := controllers.Users{UserService: &userService}
 	usersC.Templates.New = views.Must(views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml"))
 	usersC.Templates.SignIn = views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
 
@@ -50,8 +50,8 @@ func main() {
 		http.Error(w, "Page Not Found", http.StatusNotFound)
 	})
 	fmt.Println("Starting the server on: 3500...")
-	csrfKey := "gFvi45R4fy5xNBlnEeZtQbfAVCYEIAUX"
-	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false),)
+	csrfKey := "gFvi45R4fy5xNBlnEeZtQbfAVCYEIAIO"
+	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false), csrf.TrustedOrigins([]string{"http://localhost:3500"}),)
 	http.ListenAndServe(":3500", csrfMw((r)))
 }
 
