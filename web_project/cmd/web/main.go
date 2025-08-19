@@ -9,6 +9,7 @@ import (
 	"web_project/views"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/gorilla/csrf"
 )
 
 func main() {
@@ -49,5 +50,15 @@ func main() {
 		http.Error(w, "Page Not Found", http.StatusNotFound)
 	})
 	fmt.Println("Starting the server on: 3500...")
-	http.ListenAndServe(":3500", r)
+	csrfKey := "gFvi45R4fy5xNBlnEeZtQbfAVCYEIAUX"
+	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false),)
+	http.ListenAndServe(":3500", csrfMw((r)))
 }
+
+// func TimerMiddleware(h http.HandlerFunc) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+// 		start := time.Now()
+// 		h(w,r)
+// 		fmt.Println("Request time:", time.Since(start))
+// 	}
+// }
