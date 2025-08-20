@@ -50,8 +50,21 @@ func main() {
 		http.Error(w, "Page Not Found", http.StatusNotFound)
 	})
 	fmt.Println("Starting the server on: 3500...")
-	csrfKey := "gFvi45R4fy5xNBlnEeZtQbfAVCYEIAIO"
-	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false), csrf.TrustedOrigins([]string{"http://localhost:3500"}),)
+	csrfKey := []byte("32-byte-long-auth-key-1234567890abcd")
+	//csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false), csrf.TrustedOrigins([]string{"http://localhost:3500"}),)
+	csrfMw := csrf.Protect(
+		csrfKey,
+		csrf.Secure(false),
+		csrf.TrustedOrigins([]string{"http://localhost:3500"}),
+		csrf.ErrorHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			origin := r.Header.Get("Origin")
+			referer := r.Header.Get("Referer")
+			fmt.Printf("CSRF blocked! Origin: '%s', Referer: '%s'\n", origin, referer)
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("CSRF temporarily bypassed for localhost"))
+		})),
+	)
+	
 	http.ListenAndServe(":3500", csrfMw((r)))
 }
 
