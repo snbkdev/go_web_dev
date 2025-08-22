@@ -6,6 +6,10 @@ import (
 	"web_project/rand"
 )
 
+const (
+	MinBytesPerToken = 32
+)
+
 type Session struct {
 	ID int
 	UserID int
@@ -16,11 +20,16 @@ type Session struct {
 
 type SessionService struct {
 	DB *sql.DB
+	BytesPerToken int
 }
 
 func (ss *SessionService) Create(userID int) (*Session, error) {
+	bytesPerToken := ss.BytesPerToken
+	if bytesPerToken < MinBytesPerToken {
+		bytesPerToken = MinBytesPerToken
+	}
 	// create the session token
-	token, err := rand.SessionToken()
+	token, err := rand.String(bytesPerToken)
 	if err != nil {
 		return nil, fmt.Errorf("create: %w", err)
 	}
