@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"web_project/controllers"
+	"web_project/migrations"
 	"web_project/models"
 	"web_project/templates"
 	"web_project/views"
@@ -20,7 +21,7 @@ func main() {
 	}
 	defer db.Close()
 
-	err = models.Migrate(db, "migrations")
+	err = models.MigrateFS(db, migrations.FS, ".")
 	if err != nil {
 		panic(err)
 	}
@@ -61,7 +62,7 @@ func main() {
 	})
 	fmt.Println("Starting the server on: 3500...")
 	csrfKey := []byte("32-byte-long-auth-key-1234567890abcd")
-	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false),)
+	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false))
 	http.ListenAndServe(":3500", csrfMw((r)))
 }
 
