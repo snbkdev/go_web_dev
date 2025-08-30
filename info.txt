@@ -1,0 +1,17 @@
+Однострочный комментарий: Cmd + /
+Многострочный комментарий (блочный): Shift + Option + A
+
+go get -u github.com/go-chi/chi/v5
+
+go get github.com/jackc/pgx/v4
+
+go get github.com/gorilla/csrf
+
+
+Данная команда помогает установить нужную версию пакета после изменения в файле go.mod - go mod tidy
+
+go install github.com/pressly/goose/v3/cmd/goose@v3
+команды:
+goose create widgets sql
+goose postgres "host=localhost port=5432 user=postgres password=secretPassword dbname=lenslock sslmode=disable" status
+goose postgres "host=localhost port=5432 user=postgres password=secretPassword dbname=lenslock sslmode=disable" up
