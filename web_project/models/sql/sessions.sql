@@ -4,4 +4,4 @@ create table sessions (
     token_hash text unique not null
 );
 
-alter table sessions add constraint sessions_user_id_fkey foreign key (user_id) references users (id);
+--alter table sessions add constraint sessions_user_id_fkey foreign key (user_id) references users (id);
