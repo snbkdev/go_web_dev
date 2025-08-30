@@ -41,12 +41,8 @@ func (ss *SessionService) Create(userID int) (*Session, error) {
 		TokenHash: ss.hash(token),
 	}
 
-	row := ss.DB.QueryRow(`update sessions set token_hash = $2 where user_id = $1 returning id;`, session.UserID, session.TokenHash)
+	row := ss.DB.QueryRow(`insert into sessions (user_id, token_hash) values ($1, $2) on conflict (user_id) DO update set token_hash = $2 returning id;`, session.UserID, session.TokenHash)
 	err = row.Scan(&session.ID)
-	if err == sql.ErrNoRows {
-		row = ss.DB.QueryRow(`insert into sessions(user_id, token_hash) values ($1, $2) returning id;`, session.UserID, session.TokenHash)
-		err = row.Scan(&session.ID)
-	}
 	if err != nil {
 		return nil, fmt.Errorf("create: %w", err)
 	}
@@ -56,13 +52,8 @@ func (ss *SessionService) Create(userID int) (*Session, error) {
 func (ss *SessionService) User(token string) (*User, error) {
 	tokenHash := ss.hash(token)
 	var user User
-	row := ss.DB.QueryRow(`select user_id from sessions where token_hash = $1;`, tokenHash)
-	err := row.Scan(&user.ID)
-	if err != nil {
-		return nil, fmt.Errorf("user: %w", err)
-	}
-	row = ss.DB.QueryRow(`select email, password_hash from users where id = $1;`, user.ID)
-	err = row.Scan(&user.Email, &user.PasswordHash)
+	row := ss.DB.QueryRow(`select u.id, u.email, u.password_hash from sessions s join users u on u.id = s.user_id where s.token_hash = $1;`, tokenHash)
+	err := row.Scan(&user.ID, &user.Email, &user.PasswordHash)
 	if err != nil {
 		return nil, fmt.Errorf("user: %w", err)
 	}
