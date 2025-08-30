@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"net/http"
 	"web_project/models"
+	"web_project/context"
 )
 
 type Users struct {
@@ -76,19 +77,27 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
-	token, err := readCookie(r, CookieSession)
-	if err != nil {
-		fmt.Println(err)
-		http.Redirect(w, r, "/signin", http.StatusFound)
-		return
-	}
-	user, err := u.SessionService.User(token)
-	if err != nil {
-		fmt.Println(err)
+	ctx := r.Context()
+	user := context.User(ctx)
+	if user != nil {
 		http.Redirect(w, r, "/signin", http.StatusFound)
 		return
 	}
 	fmt.Fprintf(w, "Current user: %s\n", user.Email)
+
+	// token, err := readCookie(r, CookieSession)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	http.Redirect(w, r, "/signin", http.StatusFound)
+	// 	return
+	// }
+	// user, err := u.SessionService.User(token)
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	http.Redirect(w, r, "/signin", http.StatusFound)
+	// 	return
+	// }
+	// fmt.Fprintf(w, "Current user: %s\n", user.Email)
 }
 
 func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
