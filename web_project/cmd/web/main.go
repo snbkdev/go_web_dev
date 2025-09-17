@@ -60,10 +60,16 @@ func main() {
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Page Not Found", http.StatusNotFound)
 	})
-	fmt.Println("Starting the server on: 3500...")
+
+	umw := controllers.UserMiddleware{
+		SessionService: &sessionService,
+	}
+
 	csrfKey := []byte("32-byte-long-auth-key-1234567890abcd")
 	csrfMw := csrf.Protect([]byte(csrfKey), csrf.Secure(false))
-	http.ListenAndServe(":3500", csrfMw((r)))
+	
+	fmt.Println("Starting the server on: 3500...")
+	http.ListenAndServe(":3500", csrfMw(umw.SetUser(r)))
 }
 
 // func TimerMiddleware(h http.HandlerFunc) http.HandlerFunc {
