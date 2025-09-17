@@ -63,13 +63,13 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 	user, err := u.UserService.Authenticate(data.Email, data.Password)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		http.Error(w, "Something went wrong at authenticate step", http.StatusInternalServerError)
 		return
 	}
 	session, err := u.SessionService.Create(user.ID)
 	if err != nil {
 		fmt.Println(err)
-		http.Error(w, "Something went wrong", http.StatusInternalServerError)
+		http.Error(w, "Something went wrong at create step", http.StatusInternalServerError)
 		return
 	}
 	setCookie(w, CookieSession, session.Token)
@@ -77,27 +77,8 @@ func (u Users) ProcessSignIn(w http.ResponseWriter, r *http.Request) {
 }
 
 func (u Users) CurrentUser(w http.ResponseWriter, r *http.Request) {
-	ctx := r.Context()
-	user := context.User(ctx)
-	if user != nil {
-		http.Redirect(w, r, "/signin", http.StatusFound)
-		return
-	}
+	user := context.User(r.Context())
 	fmt.Fprintf(w, "Current user: %s\n", user.Email)
-
-	// token, err := readCookie(r, CookieSession)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	http.Redirect(w, r, "/signin", http.StatusFound)
-	// 	return
-	// }
-	// user, err := u.SessionService.User(token)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// 	http.Redirect(w, r, "/signin", http.StatusFound)
-	// 	return
-	// }
-	// fmt.Fprintf(w, "Current user: %s\n", user.Email)
 }
 
 func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
@@ -114,7 +95,6 @@ func (u Users) ProcessSignOut(w http.ResponseWriter, r *http.Request) {
 	}
 	deleteCookie(w, CookieSession)
 	http.Redirect(w, r, "/signin", http.StatusFound)
-
 }
 
 type UserMiddleware struct {
@@ -136,6 +116,17 @@ func (umw UserMiddleware) SetUser(next http.Handler) http.Handler {
 		ctx := r.Context()
 		ctx = context.WithUser(ctx, user)
 		r = r.WithContext(ctx)
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (umw UserMiddleware) RequireUser(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := context.User(r.Context())
+		if user != nil {
+			http.Redirect(w, r, "/signin", http.StatusFound)
+			return
+		}
 		next.ServeHTTP(w, r)
 	})
 }

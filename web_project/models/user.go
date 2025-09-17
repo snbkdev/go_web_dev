@@ -55,6 +55,5 @@ func (us *UserService) Authenticate(email, password string) (*User, error) {
 	if err != nil {
 		return nil, fmt.Errorf("authenticate: %w", err)
 	}
-	
 	return &user, nil
 }
