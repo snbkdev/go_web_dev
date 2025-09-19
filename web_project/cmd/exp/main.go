@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
+	"strconv"
+	"web_project/models"
 
-	"github.com/go-mail/mail/v2"
+	"github.com/joho/godotenv"
 )
 
 const (
@@ -15,25 +18,25 @@ const (
 )
 
 func main() {
-	from := "***"
-	to := "***"
-	subject := "This is a test"
-	plaintext := "This is the text"
-	html := `<h1>Hello there buddy!</h1><p>This is the email</p><p>Hope you enjoy it</p>`
-
-	msg := mail.NewMessage()
-	msg.SetHeader("To", to)
-	msg.SetHeader("From", from)
-	msg.SetHeader("Subject", subject)
-	msg.SetHeader("text/plain", plaintext)
-	msg.AddAlternative("text/html", html)
-
-	msg.WriteTo(os.Stdout)
-
-	dialer := mail.NewDialer(host, port, username, password)
-	err := dialer.DialAndSend(msg)
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	host := os.Getenv("SMTP_HOST")
+	portStr := os.Getenv("SMTP_PORT")
+	port, err := strconv.Atoi(portStr)
 	if err != nil {
 		panic(err)
 	}
+	username := os.Getenv("SMTP_USERNAME")
+	password := os.Getenv("SMTP_PASSWORD")
+
+	es := models.NewEmailService(models.SMTPConfig{
+		Host: host,
+		Port: port,
+		Username: username,
+		Password: password,
+	})
+	err = es.ForgotPassword("***", "***")
 	fmt.Println("Message sent")
 }
