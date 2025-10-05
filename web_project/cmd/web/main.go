@@ -20,7 +20,7 @@ type config struct {
 	PSQL models.PostgresConfig
 	SMTP models.SMTPConfig
 	CSRF struct {
-		Key string
+		Key    string
 		Secure bool
 	}
 	Server struct {
@@ -50,7 +50,7 @@ func loadEnvConfig() (config, error) {
 	// read the CSRF values from an ENV variables
 	cfg.CSRF.Key = "gFvi45R4Fy5XBlnEeZTqbfAVCYEIAUX"
 	cfg.CSRF.Secure = false
-	
+
 	// Server - read the server values from an ENV variables
 	cfg.Server.Address = ":3500"
 
@@ -95,15 +95,16 @@ func main() {
 
 	// setup controllers
 	usersC := controllers.Users{
-		UserService: userService, 
-		SessionService: sessionService,
+		UserService:          userService,
+		SessionService:       sessionService,
 		PasswordResetService: pwResetService,
-		EmailService: emailService,
+		EmailService:         emailService,
 	}
 	usersC.Templates.New = views.Must(views.ParseFS(templates.FS, "signup.gohtml", "tailwind.gohtml"))
 	usersC.Templates.SignIn = views.Must(views.ParseFS(templates.FS, "signin.gohtml", "tailwind.gohtml"))
 	usersC.Templates.ForgotPassword = views.Must(views.ParseFS(templates.FS, "forgot-pw.gohtml", "tailwind.gohtml"))
 	usersC.Templates.CheckYourEmail = views.Must(views.ParseFS(templates.FS, "check_your_email.gohtml", "tailwind.gohtml"))
+	usersC.Templates.ResetPassword = views.Must(views.ParseFS(templates.FS, "reset-pw.gohtml", "tailwind.gohtml"))
 
 	// Setup router and routes
 	r := chi.NewRouter()
@@ -120,6 +121,8 @@ func main() {
 	r.Post("/signout", usersC.ProcessSignOut)
 	r.Get("/forgot-pw", usersC.ForgotPassword)
 	r.Post("/forgot-pw", usersC.ProcessForgotPassword)
+	r.Get("/reset-pw", usersC.ResetPassword)
+	r.Post("/reset-pw", usersC.ProcessResetPassword)
 	r.Route("/users/me", func(r chi.Router) {
 		r.Use(umw.RequireUser)
 		r.Get("/", usersC.CurrentUser)
