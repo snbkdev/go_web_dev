@@ -15,6 +15,7 @@ type Users struct {
 		SignIn         Template
 		ForgotPassword Template
 		CheckYourEmail Template
+		ResetPassword Template
 	}
 	UserService          *models.UserService
 	SessionService       *models.SessionService
@@ -107,7 +108,7 @@ func (u Users) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 		Email string
 	}
 	data.Email = r.FormValue("email")
-	u.Templates.CheckYourEmail.Execute(w, r, data)
+	u.Templates.ForgotPassword.Execute(w, r, data)
 }
 
 func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
@@ -166,4 +167,41 @@ func (umw UserMiddleware) RequireUser(next http.Handler) http.Handler {
 		}
 		next.ServeHTTP(w, r)
 	})
+}
+
+
+func (u Users) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		Token string
+	}
+	data.Token = r.FormValue("token")
+	u.Templates.ResetPassword.Execute(w, r, data)
+}
+
+func (u Users) ProcessResetPassword(w http.ResponseWriter, r *http.Request) {
+	var data struct {
+		Token string
+		Password string
+	}
+	data.Token = r.FormValue("token")
+	data.Password = r.FormValue("password")
+	user, err := u.PasswordResetService.Consume(data.Token)
+	if err != nil {
+		fmt.Println(err)
+		// Todo: distingush between types of errors
+		http.Error(w, "Something went wrong(Process Reset Password)", http.StatusInternalServerError)
+		return
+	}
+
+	// todo: update the user's password
+
+	// sign the user in now that their password has been reset
+	session, err := u.SessionService.Create(user.ID)
+	if err != nil {
+		fmt.Println(err)
+		http.Redirect(w, r, "/signin", http.StatusFound)
+		return
+	}
+	setCookie(w, CookieSession, session.Token)
+	http.Redirect(w, r,  "/users/me", http.StatusFound)
 }
