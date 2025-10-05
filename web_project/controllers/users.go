@@ -107,7 +107,7 @@ func (u Users) ForgotPassword(w http.ResponseWriter, r *http.Request) {
 		Email string
 	}
 	data.Email = r.FormValue("email")
-	u.Templates.ForgotPassword.Execute(w, r, data)
+	u.Templates.CheckYourEmail.Execute(w, r, data)
 }
 
 func (u Users) ProcessForgotPassword(w http.ResponseWriter, r *http.Request) {
