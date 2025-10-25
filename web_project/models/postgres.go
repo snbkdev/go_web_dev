@@ -21,22 +21,22 @@ func Open(config PostgresConfig) (*sql.DB, error) {
 
 func DefaultPostgresConfig() PostgresConfig {
 	return PostgresConfig{
-		Host: "***",
-		Port: "***",
-		User: "***",
+		Host:     "***",
+		Port:     "***",
+		User:     "***",
 		Password: "***",
 		Database: "***",
-		SSLMode: "***",
+		SSLMode:  "***",
 	}
 }
 
 type PostgresConfig struct {
-	Host string
-	Port string
-	User string
+	Host     string
+	Port     string
+	User     string
 	Password string
 	Database string
-	SSLMode string
+	SSLMode  string
 }
 
 func (cfg PostgresConfig) String() string {

@@ -32,10 +32,18 @@ func loadEnvConfig() (config, error) {
 	var cfg config
 	err := godotenv.Load()
 	if err != nil {
-		return cfg, nil
+		return cfg, err
 	}
-	// PSQL read the PSQL values from an ENV variables
-	cfg.PSQL = models.DefaultPostgresConfig()
+
+	// Читаем PSQL значения ИЗ .env файла, а не используем дефолтные
+	cfg.PSQL = models.PostgresConfig{
+		Host:     os.Getenv("PSQL_HOST"),
+		Port:     os.Getenv("PSQL_PORT"),
+		User:     os.Getenv("PSQL_USER"),
+		Password: os.Getenv("PSQL_PASSWORD"),
+		Database: os.Getenv("PSQL_DATABASE"),
+		SSLMode:  os.Getenv("PSQL_SSLMODE"),
+	}
 
 	// SMTP
 	cfg.SMTP.Host = os.Getenv("SMTP_HOST")
