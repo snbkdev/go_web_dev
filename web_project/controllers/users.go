@@ -7,6 +7,7 @@ import (
 	"net/url"
 	"web_project/context"
 	"web_project/models"
+	"web_project/ownerrors"
 )
 
 type Users struct {
@@ -41,6 +42,9 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	data.Password = r.FormValue("password")
 	user, err := u.UserService.Create(data.Email, data.Password)
 	if err != nil {
+		if ownerrors.Is(err, models.ErrEmailTaken) {
+			err = ownerrors.Public(err, "This email address is already associated with an account")
+		}
 		u.Templates.New.Execute(w, r, data, err)
 		return
 	}
