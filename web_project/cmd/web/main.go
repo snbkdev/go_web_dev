@@ -55,11 +55,9 @@ func loadEnvConfig() (config, error) {
 	cfg.SMTP.Username = os.Getenv("SMTP_USERNAME")
 	cfg.SMTP.Password = os.Getenv("SMTP_PASSWORD")
 
-	// read the CSRF values from an ENV variables
 	cfg.CSRF.Key = "gFvi45R4Fy5XBlnEeZTqbfAVCYEIAUX"
 	cfg.CSRF.Secure = false
 
-	// Server - read the server values from an ENV variables
 	cfg.Server.Address = ":3500"
 
 	return cfg, nil
