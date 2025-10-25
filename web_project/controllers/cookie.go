@@ -11,9 +11,9 @@ const (
 
 func newCookie(name, value string) *http.Cookie {
 	cookie := http.Cookie{
-		Name: name,
-		Value: value,
-		Path: "/",
+		Name:     name,
+		Value:    value,
+		Path:     "/",
 		HttpOnly: true,
 	}
 	return &cookie

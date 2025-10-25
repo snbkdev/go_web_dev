@@ -71,10 +71,36 @@ func (service *PasswordResetService) Create(email string) (*PasswordReset, error
 }
 
 func (service *PasswordResetService) Consume(token string) (*User, error) {
-	return nil, fmt.Errorf("Todo: implement passwordresetservice.consume")
+	tokenHash := service.hash(token)
+	var user User
+	var pwReset PasswordReset
+	row := service.DB.QueryRow(`select pr.expires_at, u.id, u.email, u.password_hash from password_resets pr join users u on u.id = pr.user_id where pr.token_hash = $1;`, tokenHash)
+	err := row.Scan(&pwReset.ID, &pwReset.ExpiresAt, &user.ID, &user.Email, &user.PasswordHash)
+	if err != nil {
+		return nil, fmt.Errorf("consume: %w", err)
+	}
+
+	if time.Now().After(pwReset.ExpiresAt) {
+		return nil, fmt.Errorf("token expired: %v", token)
+	}
+
+	err = service.delete(pwReset.ID)
+	if err != nil {
+		return nil, fmt.Errorf("delete on consume: %w", err)
+	}
+
+	return &user, nil
 }
 
 func (service *PasswordResetService) hash(token string) string {
 	tokenHash := sha256.Sum256([]byte(token))
 	return base64.URLEncoding.EncodeToString(tokenHash[:])
+}
+
+func (service *PasswordResetService) delete(id int) error {
+	_, err := service.DB.Exec(`delete from password_resets where id = $1;`, id)
+	if err != nil {
+		return fmt.Errorf("delete: %w", err)
+	}
+	return nil
 }
