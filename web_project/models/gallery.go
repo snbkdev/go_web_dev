@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"web_project/ownerrors"
 )
 
 type Gallery struct {
@@ -17,7 +18,7 @@ type GalleryService struct {
 
 func (service *GalleryService) Create(title string, userID int) (*Gallery, error) {
 	gallery := Gallery{
-		Title: title,
+		Title:  title,
 		UserID: userID,
 	}
 	row := service.DB.QueryRow(`insert into(title, user_id) values($1, $2) returning id;`, gallery.Title, gallery.UserID)
@@ -26,5 +27,20 @@ func (service *GalleryService) Create(title string, userID int) (*Gallery, error
 		return nil, fmt.Errorf("create gallery: %w", err)
 	}
 
+	return &gallery, nil
+}
+
+func (service *GalleryService) ByID(id int) (*Gallery, error) {
+	gallery := Gallery{
+		ID: id,
+	}
+	row := service.DB.QueryRow(`select title, user_id from galleries where id = $1`, gallery.ID)
+	err := row.Scan(&gallery.Title, &gallery.UserID)
+	if err != nil {
+		if ownerrors.Is(err, sql.ErrNoRows) {
+			return nil, ownerrors.ErrNotFound
+		}
+		return nil, fmt.Errorf("query gallery by id: %w", err)
+	}
 	return &gallery, nil
 }
