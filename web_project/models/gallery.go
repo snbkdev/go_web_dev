@@ -44,3 +44,33 @@ func (service *GalleryService) ByID(id int) (*Gallery, error) {
 	}
 	return &gallery, nil
 }
+
+func (service *GalleryService) ByUserID(userID int) ([]Gallery, error) {
+	rows, err := service.DB.Query(`select id, title from galleries where user_id = $1;`, userID)
+	if err != nil {
+		return nil, fmt.Errorf("query gallerires by user: %w", err)
+	}
+	var galleries []Gallery
+	for rows.Next() {
+		gallery := Gallery{
+			UserID: userID,
+		}
+		err = rows.Scan(&gallery.ID, gallery.Title)
+		if err != nil {
+			return nil, fmt.Errorf("query galleries by user: %w", err)
+		}
+		galleries = append(galleries, gallery)
+	}
+	if rows.Err() != nil {
+		return nil, fmt.Errorf("query galleries by user: %w", err)
+	}
+	return galleries, nil
+}
+
+func (service *GalleryService) Update(gallery *Gallery) error {
+	_, err := service.DB.Exec(`update galleries set title = $2 where id = $1;`, gallery.ID, gallery.Title)
+	if err != nil {
+		return fmt.Errorf("update gallery: %w", err)
+	}
+	return nil
+}
