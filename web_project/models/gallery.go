@@ -74,3 +74,11 @@ func (service *GalleryService) Update(gallery *Gallery) error {
 	}
 	return nil
 }
+
+func (service *GalleryService) Delete(id int) error {
+	_, err := service.DB.Exec(`delete from galleries where id = $1;`, id)
+	if err != nil {
+		return fmt.Errorf("delete gallery: %w", err)
+	}
+	return nil
+}
