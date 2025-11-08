@@ -100,7 +100,7 @@ func main() {
 	umw := controllers.UserMiddleware{
 		SessionService: sessionService,
 	}
-	csrfMw := csrf.Protect([]byte(cfg.CSRF.Key), csrf.Secure(cfg.CSRF.Secure))
+	csrfMw := csrf.Protect([]byte(cfg.CSRF.Key), csrf.Secure(cfg.CSRF.Secure), csrf.Path("/"),)
 
 	// setup controllers
 	usersC := controllers.Users{
@@ -141,7 +141,13 @@ func main() {
 		r.Use(umw.RequireUser)
 		r.Get("/", usersC.CurrentUser)
 	})
-	r.Get("/galleries/new", galleriesC.New)
+	r.Route("/galleries", func(r chi.Router) {
+		r.Group(func(r chi.Router)  {
+			r.Use(umw.RequireUser)
+			r.Get("/new", galleriesC.New)
+			r.Post("/", galleriesC.Create)
+		})
+	})
 	//r.Get("/users/me", usersC.CurrentUser)
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Page Not Found", http.StatusNotFound)
