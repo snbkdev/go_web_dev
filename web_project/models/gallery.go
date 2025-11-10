@@ -3,6 +3,7 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"path/filepath"
 	"web_project/ownerrors"
 )
 
@@ -14,6 +15,7 @@ type Gallery struct {
 
 type GalleryService struct {
 	DB *sql.DB
+	ImagesDir string
 }
 
 func (service *GalleryService) Create(title string, userID int) (*Gallery, error) {
@@ -81,4 +83,12 @@ func (service *GalleryService) Delete(id int) error {
 		return fmt.Errorf("delete gallery: %w", err)
 	}
 	return nil
+}
+
+func (service *GalleryService) galleryDir(id int) string {
+	imagesDir := service.ImagesDir
+	if imagesDir == "" {
+		imagesDir = "images"
+	}
+	return filepath.Join(imagesDir, fmt.Sprintf("gallery-%d", id))
 }
