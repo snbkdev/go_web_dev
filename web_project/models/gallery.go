@@ -3,6 +3,8 @@ package models
 import (
 	"database/sql"
 	"fmt"
+	"io/fs"
+	"os"
 	"path/filepath"
 	"strings"
 	"web_project/ownerrors"
@@ -117,6 +119,22 @@ func (service *GalleryService) Images(galleryID int) ([]Image, error) {
 		}
 	}
 	return images, nil
+}
+
+func (service GalleryService) Image(galleryID int, filename string) (Image, error) {
+	imagePath := filepath.Join(service.galleryDir(galleryID), filename)
+	_, err := os.Stat(imagePath)
+	if err != nil {
+		if ownerrors.Is(err, fs.ErrNotExist) {
+			return Image{}, ownerrors.ErrNotFound
+		}
+		return Image{}, fmt.Errorf("querying for image: %w", err)
+	}
+	return Image{
+		Filename: filename,
+		GalleryID: galleryID,
+		Path: imagePath,
+	}, nil
 }
 
 func (service *GalleryService) extensions() []string {
