@@ -153,9 +153,9 @@ func main() {
 			r.Post("/", galleriesC.Create)
 			r.Get("/{id}/edit", galleriesC.Edit)
 			r.Post("/{id}", galleriesC.Update)
+			r.Post("/{id}/delete", galleriesC.Delete)
 		})
 	})
-	//r.Get("/users/me", usersC.CurrentUser)
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Page Not Found", http.StatusNotFound)
 	})
@@ -167,11 +167,3 @@ func main() {
 		panic(err)
 	}
 }
-
-// func TimerMiddleware(h http.HandlerFunc) http.HandlerFunc {
-// 	return func(w http.ResponseWriter, r *http.Request) {
-// 		start := time.Now()
-// 		h(w,r)
-// 		fmt.Println("Request time:", time.Since(start))
-// 	}
-// }
