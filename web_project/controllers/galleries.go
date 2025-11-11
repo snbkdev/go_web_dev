@@ -163,7 +163,7 @@ func (g Galleries) galleryByID(w http.ResponseWriter, r *http.Request, opts ...g
 	}
 	gallery, err := g.GalleryService.ByID(id)
 	if err != nil {
-		if ownerrors.Is(err, ownerrors.ErrNotFound) {
+		if ownerrors.Is(err, models.ErrNotFound) {
 			http.Error(w, "Gallery not found", http.StatusNotFound)
 			return nil, err
 		}
@@ -216,7 +216,7 @@ func (g Galleries) Image(w http.ResponseWriter, r *http.Request) {
 	}
 	image, err := g.GalleryService.Image(galleryID, filename)
 	if err != nil {
-		if ownerrors.Is(err, ownerrors.ErrNotFound) {
+		if ownerrors.Is(err, models.ErrNotFound) {
 			http.Error(w, "image not found", http.StatusNotFound)
 			return
 		}

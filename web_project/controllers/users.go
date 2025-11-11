@@ -42,7 +42,7 @@ func (u Users) Create(w http.ResponseWriter, r *http.Request) {
 	data.Password = r.FormValue("password")
 	user, err := u.UserService.Create(data.Email, data.Password)
 	if err != nil {
-		if ownerrors.Is(err, ownerrors.ErrEmailTaken) {
+		if ownerrors.Is(err, models.ErrEmailTaken) {
 			err = ownerrors.Public(err, "This email address is already associated with an account")
 		}
 		u.Templates.New.Execute(w, r, data, err)

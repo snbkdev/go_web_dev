@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"web_project/ownerrors"
+	"errors"
 )
 
 type Image struct {
@@ -49,8 +49,8 @@ func (service *GalleryService) ByID(id int) (*Gallery, error) {
 	row := service.DB.QueryRow(`select title, user_id from galleries where id = $1`, gallery.ID)
 	err := row.Scan(&gallery.Title, &gallery.UserID)
 	if err != nil {
-		if ownerrors.Is(err, sql.ErrNoRows) {
-			return nil, ownerrors.ErrNotFound
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, ErrNotFound
 		}
 		return nil, fmt.Errorf("query gallery by id: %w", err)
 	}
@@ -114,8 +114,8 @@ func (service *GalleryService) Images(galleryID int) ([]Image, error) {
 		if hasExtension(file, service.extensions()) {
 			images = append(images, Image{
 				GalleryID: galleryID,
-				Path: file,
-				Filename: filepath.Base(file),
+				Path:      file,
+				Filename:  filepath.Base(file),
 			})
 		}
 	}
@@ -126,15 +126,15 @@ func (service GalleryService) Image(galleryID int, filename string) (Image, erro
 	imagePath := filepath.Join(service.galleryDir(galleryID), filename)
 	_, err := os.Stat(imagePath)
 	if err != nil {
-		if ownerrors.Is(err, fs.ErrNotExist) {
-			return Image{}, ownerrors.ErrNotFound
+		if errors.Is(err, fs.ErrNotExist) {
+			return Image{}, ErrNotFound
 		}
 		return Image{}, fmt.Errorf("querying for image: %w", err)
 	}
 	return Image{
-		Filename: filename,
+		Filename:  filename,
 		GalleryID: galleryID,
-		Path: imagePath,
+		Path:      imagePath,
 	}, nil
 }
 
