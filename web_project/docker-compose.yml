@@ -6,16 +6,7 @@ services:
     image: postgres 
     restart: always 
     environment: 
-      POSTGRES_USER: ***
-      POSTGRES_PASSWORD: ***
-      POSTGRES_DB: ***
-    ports:
-      - 5432:5432
+      POSTGRES_USER: ${PSQL_USER}
+      POSTGRES_PASSWORD: ${PSQL_PASSWORD}
+      POSTGRES_DB: ${PSQL_DATABASE}
 
-  adminer:
-    image: adminer
-    restart: always
-    environment:
-      ADMINER_DESIGN: dracula 
-    ports:
-      - 3333:8080

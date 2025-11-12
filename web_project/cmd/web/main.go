@@ -44,6 +44,9 @@ func loadEnvConfig() (config, error) {
 		Database: os.Getenv("PSQL_DATABASE"),
 		SSLMode:  os.Getenv("PSQL_SSLMODE"),
 	}
+	if cfg.PSQL.Host == "" && cfg.PSQL.Port == "" {
+		return cfg, fmt.Errorf("No PSQL config provided")
+	}
 
 	// SMTP
 	cfg.SMTP.Host = os.Getenv("SMTP_HOST")
@@ -55,10 +58,10 @@ func loadEnvConfig() (config, error) {
 	cfg.SMTP.Username = os.Getenv("SMTP_USERNAME")
 	cfg.SMTP.Password = os.Getenv("SMTP_PASSWORD")
 
-	cfg.CSRF.Key = "gFvi45R4Fy5XBlnEeZTqbfAVCYEIAUX"
-	cfg.CSRF.Secure = false
+	cfg.CSRF.Key = os.Getenv("CSRF_KEY")
+	cfg.CSRF.Secure = os.Getenv("CSRF_SECURE") == "true"
 
-	cfg.Server.Address = ":3500"
+	cfg.Server.Address = os.Getenv("SERVER_ADDRESS")
 
 	return cfg, nil
 }
