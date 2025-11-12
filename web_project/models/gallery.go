@@ -138,10 +138,6 @@ func (service GalleryService) Image(galleryID int, filename string) (Image, erro
 	}, nil
 }
 
-func (service *GalleryService) extensions() []string {
-	return []string{".png", ".jpg", ".jpeg", ".gif"}
-}
-
 func hasExtension(file string, extensions []string) bool {
 	for _, ext := range extensions {
 		file = strings.ToLower(file)
@@ -165,9 +161,24 @@ func (service GalleryService) DeleteImage(galleryID int, filename string) error 
 	return nil
 }
 
-func (service GalleryService) CreateImage(galleryID int, filename string, contents io.Reader) error {
+func (service *GalleryService) CreateImage(galleryID int, filename string, contents io.ReadSeeker) error {
+	_, err := checkContentType(contents, service.imageContentTypes())
+	if err != nil {
+		return fmt.Errorf("create img %v: %w", filename, err)
+	}
+
+	_, err = contents.Seek(0, 0)
+	if err != nil {
+		return fmt.Errorf("rewinding file: %w", err)
+	}
+	
+	err = checkExtension(filename, service.extensions())
+	if err != nil {
+		return fmt.Errorf("create img %v: %w", filename, err)
+	}
+
 	galleryDir := service.galleryDir(galleryID)
-	err := os.MkdirAll(galleryDir, 0755)
+	err = os.MkdirAll(galleryDir, 0755)
 	if err != nil {
 		return fmt.Errorf("creating image repository %w", err)
 	}
@@ -180,8 +191,16 @@ func (service GalleryService) CreateImage(galleryID int, filename string, conten
 
 	_, err = io.Copy(dst, contents)
 	if err != nil {
-		return fmt.Errorf("copying contentst to image: %w", err)
+		return fmt.Errorf("copying contents to image: %w", err)
 	}
 
 	return nil
+}
+
+func (service *GalleryService) extensions() []string {
+	return []string{".png", ".jpg", ".jpeg", ".gif"}
+}
+
+func (service *GalleryService) imageContentTypes() []string {
+	return []string{"image/png", "image/jpeg", "image/jpg", "image/gif"}
 }
